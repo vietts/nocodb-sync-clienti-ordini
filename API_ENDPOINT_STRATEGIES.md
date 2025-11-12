@@ -49,10 +49,10 @@ Lo script `src/index.js` usa già questo approccio! È il metodo che abbiamo sce
 
 ---
 
-## ⚠️ **Strategia 2: Endpoint Dedicato `/links/`**
+## ✅ **Strategia 2: Endpoint Dedicato `/links/` (QUELLA CHE FUNZIONA!)**
 
 **Release**: NocoDB 0.200.0+
-**Status**: Bug corretto in PR #7017
+**Status**: ✅ Verificato da swagger.json ufficiale
 **Pattern**: `/api/v2/tables/{tableId}/links/{linkFieldId}/records/{recordId}`
 
 ### Come Funziona
@@ -63,17 +63,29 @@ Usa un endpoint dedicato per gestire i link:
 # GET - Leggi i link
 GET /api/v2/tables/{clientsTableId}/links/{relationFieldId}/records/{clientId}
 
-# POST - Aggiungi link
+# POST - Aggiungi link (quello che usiamo!)
 POST /api/v2/tables/{clientsTableId}/links/{relationFieldId}/records/{clientId}
 Content-Type: application/json
 
-{
-  "data": [{id: orderId1}, {id: orderId2}]
-}
+[
+  { "Id": orderId1 },
+  { "Id": orderId2 }
+]
 
 # DELETE - Rimuovi link
-DELETE /api/v2/tables/{clientsTableId}/links/{relationFieldId}/records/{clientId}/{orderId}
+DELETE /api/v2/tables/{clientsTableId}/links/{relationFieldId}/records/{clientId}
+
+[
+  { "Id": orderId1 },
+  { "Id": orderId2 }
+]
 ```
+
+### 🎯 Dettagli Importanti
+
+- **Payload**: Array di oggetti con **capitale `I` in "Id"** (non minuscolo!)
+- **Response**: `{ "status": 200, "value": true }`
+- **Note**: Existing links rimangono intatti, aggiungi solo nuove associazioni
 
 ### Vantaggi
 ✅ Endpoint dedicato (separation of concerns)

@@ -4,14 +4,16 @@
  * NocoDB Sync: Link Orders to Clients
  * Sincronizza e collega ordini a clienti tramite email matching
  *
- * API Documentation:
- * - Paginated Record Fetching: GET /tables/{tableId}/records?limit=100&offset=0
- * - Update with Relational Field: PATCH /tables/{tableId}/records/{recordId}
- *   Payload: { fieldId: [{id: orderId1}, {id: orderId2}, ...] }
- *   Note: Uses field ID (not field name) for relation fields
+ * API Endpoints Used:
+ * - Load Records: GET /api/v2/tables/{tableId}/records?limit=100&offset=0
+ * - Link Records: POST /api/v2/tables/{clientsTableId}/links/{relationFieldId}/records/{clientId}
+ *   Payload: [{ Id: orderId1 }, { Id: orderId2 }, ...]
+ *   Note: Uses capital 'I' in 'Id' (not lowercase 'id')
  *
- * Based on NocoDB API v2 unified record linking in CRUD operations
- * https://nocodb.com/docs/scripts/examples/link-records-by-field
+ * The /links/{linkFieldId}/records/{recordId} endpoint is the official NocoDB way
+ * to link many-to-many relational records via REST API.
+ *
+ * Swagger verified from: https://app.nocodb.com/api/v2/meta/bases/pw0wt0aa3ck1fmm/swagger
  */
 
 import 'dotenv/config';
@@ -223,12 +225,15 @@ async function main() {
       }
 
       try {
-        // Update client with linked orders using field ID
-        // NocoDB unified linking supports direct updates with array of record IDs
-        const payload = {};
-        payload[config.nocodb.relationFieldId] = linkedOrderIds.map((id) => ({ id }));
+        // Link orders to client using NocoDB POST /links endpoint
+        // API endpoint: POST /api/v2/tables/{clientsTableId}/links/{relationFieldId}/records/{clientId}
+        // Payload: Array of {Id: recordId} objects (note: capital 'I' in 'Id')
+        const linkedRecords = linkedOrderIds.map((id) => ({ Id: id }));
 
-        await api.patch(`/tables/${config.nocodb.clientsTableId}/records/${client.id}`, payload);
+        await api.post(
+          `/tables/${config.nocodb.clientsTableId}/links/${config.nocodb.relationFieldId}/records/${client.id}`,
+          linkedRecords
+        );
 
         updatedCount++;
         const progress = Math.round(((i + 1) / clients.length) * 100);
