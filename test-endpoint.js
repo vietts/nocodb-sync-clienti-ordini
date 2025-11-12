@@ -2,6 +2,25 @@
 
 /**
  * Test different NocoDB API endpoints for updating relational fields
+ *
+ * Testa 3 diverse strategie per collegare record in NocoDB:
+ *
+ * Test 1 (CONSIGLIATO): API v3 Unified CRUD - PATCH record con field name
+ *   - Pattern: PATCH /tables/{tableId}/records/{recordId}
+ *   - Payload: {fieldName: [{id: ...}]}
+ *   - Versione: 0.264.0+
+ *
+ * Test 2 (ALTERNATIVA): API v3 Unified CRUD - PATCH record con field ID
+ *   - Pattern: PATCH /tables/{tableId}/records/{recordId}
+ *   - Payload: {fieldId: [{id: ...}]}
+ *   - Versione: 0.264.0+
+ *
+ * Test 3 (FALLBACK): Endpoint dedicato /links/ - POST al link endpoint
+ *   - Pattern: POST /tables/{tableId}/links/{fieldId}/records/{recordId}
+ *   - Payload: {data: [{id: ...}]}
+ *   - Versione: 0.200.0+
+ *
+ * Vedi API_ENDPOINT_STRATEGIES.md per dettagli completi
  */
 
 import 'dotenv/config';
@@ -89,8 +108,8 @@ async function testEndpoints() {
 
     await new Promise(r => setTimeout(r, 500));
 
-    // Test Approach 3: POST to /links endpoint
-    console.log('5️⃣  Test 3 - POST to /links endpoint');
+    // Test Approach 3: POST to /links endpoint (Strategia 2)
+    console.log('5️⃣  Test 3 - POST to /links endpoint (Strategia 2 - Fallback)');
     try {
       const res3 = await api.post(
         `/tables/${config.clientsTableId}/links/${config.relationFieldId}/records/${client.id}`,
