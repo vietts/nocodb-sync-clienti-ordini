@@ -1,0 +1,27 @@
+{
+  "name": "nocodb-sync-clienti-ordini",
+  "version": "1.0.0",
+  "description": "Sincronizza e collega ordini a clienti in NocoDB tramite email matching",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "NODE_ENV=development node src/index.js",
+    "test": "node --test tests/**/*.test.js"
+  },
+  "keywords": [
+    "nocodb",
+    "api",
+    "sync",
+    "relational-data"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "dotenv": "^16.3.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
