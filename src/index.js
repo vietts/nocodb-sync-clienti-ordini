@@ -3,6 +3,15 @@
 /**
  * NocoDB Sync: Link Orders to Clients
  * Sincronizza e collega ordini a clienti tramite email matching
+ *
+ * API Documentation:
+ * - Paginated Record Fetching: GET /tables/{tableId}/records?limit=100&offset=0
+ * - Update with Relational Field: PATCH /tables/{tableId}/records/{recordId}
+ *   Payload: { fieldId: [{id: orderId1}, {id: orderId2}, ...] }
+ *   Note: Uses field ID (not field name) for relation fields
+ *
+ * Based on NocoDB API v2 unified record linking in CRUD operations
+ * https://nocodb.com/docs/scripts/examples/link-records-by-field
  */
 
 import 'dotenv/config';
@@ -214,10 +223,12 @@ async function main() {
       }
 
       try {
-        // Update client with linked orders
-        await api.patch(`/tables/${config.nocodb.clientsTableId}/records/${client.id}`, {
-          [config.nocodb.relationFieldName]: linkedOrderIds.map((id) => ({ id })),
-        });
+        // Update client with linked orders using field ID
+        // NocoDB unified linking supports direct updates with array of record IDs
+        const payload = {};
+        payload[config.nocodb.relationFieldId] = linkedOrderIds.map((id) => ({ id }));
+
+        await api.patch(`/tables/${config.nocodb.clientsTableId}/records/${client.id}`, payload);
 
         updatedCount++;
         const progress = Math.round(((i + 1) / clients.length) * 100);
@@ -235,6 +246,14 @@ async function main() {
         if (errorCount <= 5) {
           console.error(
             `  ❌ Errore aggiornamento ${emailLower}: ${error.response?.data?.message || error.message}`
+          );
+        }
+        if (errorCount === 1) {
+          console.error(
+            `     Endpoint: PATCH /tables/${config.nocodb.clientsTableId}/records/${client.id}`
+          );
+          console.error(
+            `     Payload: { ${config.nocodb.relationFieldId}: [{id: ...}, ...] }`
           );
         }
       }

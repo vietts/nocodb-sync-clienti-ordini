@@ -108,14 +108,32 @@ Vedi `.env.example` per tutte le variabili disponibili:
 ### "401 Unauthorized"
 - Verifica che `NOCODB_API_TOKEN` sia corretto
 - Assicurati che il token non sia scaduto
+- Token deve essere passato come: `Authorization: Bearer {token}`
 
-### "404 Not Found"
-- Verifica gli ID delle tabelle
-- Verifica i nomi dei campi in NocoDB
+### "404 Not Found" durante l'aggiornamento
+- **IMPORTANTE**: Verifica che `NOCODB_RELATION_FIELD_ID` sia corretto (NON il nome del campo)
+- Per trovare l'ID del campo:
+  1. Vai nella tabella Clienti su NocoDB
+  2. Click destro sulla colonna "Orders 1"
+  3. Seleziona "Edit field"
+  4. L'ID è visualizzato in fondo al form
+- Verifica gli ID delle tabelle: `NOCODB_CLIENTS_TABLE_ID` e `NOCODB_ORDERS_TABLE_ID`
 
 ### "429 Too Many Requests"
 - NocoDB sta limitando le richieste
-- Lo script ha retry automatico, riprova dopo qualche secondo
+- Aumenta il delay tra richieste modificando il valore di `setTimeout` in src/index.js (attualmente 100ms)
+- Lo script ha un rate limiting di 1 secondo tra le richieste di caricamento pagine
+
+### Script carica dati ma non collega ordini
+- Verifica che il campo "Orders 1" sia effettivamente un campo relazionale (Link to another record)
+- Conferma che `NOCODB_RELATION_FIELD_ID` corrisponda al campo relazionale corretto
+- Prova a loggare il primo errore di aggiornamento (verrà stampato alla console)
+
+### Testa l'endpoint con il script di test
+```bash
+node test-endpoint.js
+```
+Questo script testa 4 diversi approcci di aggiornamento e mostra quale funziona.
 
 ## 📝 Note Tecniche
 
